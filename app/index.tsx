@@ -1,12 +1,16 @@
+import { getDatabase, ref, set, push, update, remove } from "firebase/database";
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { firebaseConnection } from "../service/firebaseConnection";
 
 export default function App() {
+    const db = getDatabase(firebaseConnection);
 
   return (
     <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
+        <TouchableOpacity style={styles.button}>
+            <Text>Button Text</Text>
+        </TouchableOpacity>
     </View>
   );
 }
@@ -14,8 +18,11 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'black',
     alignItems: 'center',
     justifyContent: 'center',
   },
+  button: {
+    alignSelf: 'flex-end'
+  }
 });
