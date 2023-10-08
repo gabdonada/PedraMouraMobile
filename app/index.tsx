@@ -1,4 +1,5 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FAB } from '@rneui/themed';
 import { DB } from '../service/firebaseConnection';
 
 export default function App() {
@@ -25,12 +26,21 @@ export default function App() {
           <Text>Sub Div 2</Text>
         </View>
       </View>
+
+      <View style={styles.actionCont}>  
+        <FAB
+          visible={true}
+          icon={{ name: 'add', color: 'white' }}
+          size='large'
+        />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     backgroundColor: 'white',
     height: 200, // Adjust the height as needed (20rem equivalent)
     padding: 20, // Add padding for spacing
@@ -60,4 +70,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderRadius: 5,
   },
+
+
+
+  actionCont: {
+    flex: 1,
+    justifyContent: 'flex-end'
+  }
 });
