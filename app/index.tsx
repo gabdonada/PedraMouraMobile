@@ -1,30 +1,71 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import { DB } from '../service/firebaseConnection';
+import * as WebBrowser from 'expo-web-browser';
+import * as Google from 'expo-auth-session/providers/google';
+import * as React from 'react';
+
+// web: 251635948730-puag82rtd64jivf5h6fp56f1d9sh2ve8.apps.googleusercontent.com
+// iOS: 251635948730-qqufpsqma7n3o0l7rcf886boa5949uha.apps.googleusercontent.com
+// And: 251635948730-s8moank2vubsloq8mvmfjr9ggvdlkaaa.apps.googleusercontent.com
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function App() {
 
+  const [accessToken, setAccessToken] = React.useState(null);
+  const [user, setuser] = React.useState(null);
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    clientId: "251635948730-puag82rtd64jivf5h6fp56f1d9sh2ve8.apps.googleusercontent.com",
+    iosClientId: "251635948730-qqufpsqma7n3o0l7rcf886boa5949uha.apps.googleusercontent.com",
+    androidClientId: "251635948730-s8moank2vubsloq8mvmfjr9ggvdlkaaa.apps.googleusercontent.com"
+  });
+
   const db = DB;
+
+  React.useEffect(() => {
+    if (response?.type === "success"){
+      setAccessToken(response.authentication.accessToken);
+      accessToken && fetchUserInfo();
+    }
+  }, [response, accessToken])
+
+  async function fetchUserInfo() {
+    let response = await fetch("https://www.googleapis.com/userinfo/v2/me", {
+      headers:
+        { Authorization: `Bearer ${accessToken}` }  
+      });
+      const useInfo = await response.json();
+      setuser(useInfo);
+  }
+
+  const ShowUserInfo = () => {
+    if(user) {
+      return(
+        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+          <Text style={{fontSize: 35, fontWeight: 'bold', marginBottom: 20}}>Bem-vindo</Text>
+          <Image source={{uri: user.picture}} style={{width: 100, height: 100, borderRadius: 50}} />
+          <Text style={{fontSize: 20, fontWeight: 'bold'}}>{user.name}</Text>
+        </View>
+      )
+    }
+  }
 
   return (
     <View style={styles.container}>
-      <View style={styles.topDiv}>
-        {/* Your content for the top div */}
-        <Text>Top Div Content</Text>
-      </View>
-
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Button Text</Text>
-      </TouchableOpacity>
-
-      <View style={styles.bottomDiv}>
-        {/* Additional divs below the button */}
-        <View style={styles.subDiv}>
-          <Text>Sub Div 1</Text>
-        </View>
-        <View style={styles.subDiv}>
-          <Text>Sub Div 2</Text>
-        </View>
-      </View>
+      {user && <ShowUserInfo />}
+      {user === null &&
+          <>
+          <Text style={{fontSize: 35, fontWeight: 'bold'}}>Seja bem-vindo(a)</Text>
+          <Text style={{fontSize: 25, fontWeight: 'bold', marginBottom: 20, color: 'gray'}}>Faça seu login</Text>
+        <TouchableOpacity
+          disabled={!request}
+          onPress={() => {
+            promptAsync();
+          }}>
+          <Image source={require("../assets/btn_google.png")} style={{width: 300, height: 40}} />
+        </TouchableOpacity>
+        </>
+      }
     </View>
   );
 }
